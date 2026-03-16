@@ -1,90 +1,215 @@
-# EcoRescue – Disaster Response & Coordination (Bangalore)
+EcoRescue – AI Powered Disaster Response System
 
-EcoRescue is a disaster response coordination system that models high-risk zones, shelters, volunteers, and real-time detections to support efficient rescue and evacuation operations in Bangalore.  
-The current dataset focuses on key localities such as Indira Nagar, Bellandur, Electronic City Phase I, and RajaRajeshwari Nagar (configured as a high-risk red zone).
+📌 Overview
+EcoRescue is an AI-powered disaster response and resource allocation system designed to assist emergency response teams during natural disasters such as floods, earthquakes, and large-scale evacuations.
+The system uses computer vision and intelligent resource allocation algorithms to detect people in affected zones and automatically assign shelter beds and volunteers in real time.
+The platform consists of:
+AI-based people detection
+Automated volunteer assignment
+Shelter resource management
+Risk monitoring dashboard
+The goal of EcoRescue is to reduce response time, improve coordination, and optimize resource distribution during emergencies.
 
----
+🚀 Features
 
-## Overview
+1️⃣ AI-based People Detection
+Uses YOLOv8 object detection model
+Detects number of people in uploaded images
+Automatically records detection data in the database
+The model used:
+YOLOv8n (Ultralytics)
 
-EcoRescue is designed as the backend data layer for an emergency management platform.  
-It tracks which areas are at risk, where shelters are located, how many beds are available, which volunteers are free or assigned, and which detections (incidents) are currently active.  
-Assignments then link volunteers, detections, and shelters into concrete “missions”.
+2️⃣ Intelligent Resource Allocation
+After detecting people in a zone, the system:
+Finds available shelters
+Checks available beds
+Assigns volunteers
+Updates shelter occupancy automatically
+This is handled by the AI Agent Logic in the backend.
 
-This repository currently contains:
-- A complete MySQL schema for the EcoRescue database.
-- Seed data for Bangalore zones, shelters, volunteers, detections, and assignments.
-- Example queries to explore and debug the system.
+3️⃣ Risk Level Monitoring
+Each zone is dynamically classified into risk levels based on:
+Number of detected people
+Shelter overload
+Detection frequency
+Risk Levels:
+Risk Score	Level	Color
+0–50	Safe	Green
+51–100	Caution	Yellow
+101–200	Elevated	Orange
+200+	Severe	Red
 
----
+The system automatically updates zone risk status.
+4️⃣ Emergency Dashboard
+The dashboard provides real-time information such as:
+Total detected people
+Available shelter beds
+Active volunteers
+Critical zones
+Zone-level statistics
+Data is fetched through the /dashboard API.
 
-## Features
+🏗 System Architecture
 
-- **Risk-zoned localities**
-  - Models Bangalore areas like **Indira Nagar**, **Bellandur**, **Electronic City Phase I**, and **RajaRajeshwari Nagar**.
-  - Per-zone risk levels using `ENUM('Safe','Caution','Elevated','Severe')` and a color code (e.g., green, yellow, orange, red).
-  - `RajaRajeshwari Nagar` is set as a **Severe (red)** zone to simulate a critical area.
 
-- **Shelter management**
-  - Exactly **two shelters per zone**, with realistic Indian names and locations.
-  - For RR Nagar, one shelter is explicitly modeled as **“RV College of Engineering”** to act as a major relief center.
-  - Tracks `available_beds` vs `total_beds` to monitor capacity.
+          Camera / Image Upload
+                    │
+                    ▼
+           AI Detection (YOLOv8)
+                    │
+                    ▼
+           FastAPI Backend Server
+                    │
+       ┌────────────┼────────────┐
+       ▼            ▼            ▼
+   MySQL DB     AI Agent      Risk Engine
+       │            │            │
+       ▼            ▼            ▼
+     Shelters   Volunteer     Zone Status
+     Database   Assignment     Update
+                    │
+                    ▼
+             React Dashboard
+🛠 Tech Stack
+Backend
+*FastAPI
+*Python
+*YOLOv8 (Ultralytics)
+*OpenCV
+*NumPy
+*MySQL
 
-- **Volunteer tracking**
-  - Each volunteer has:
-    - `status`: `Available` or `Assigned`
-    - `zone_id`: current assigned zone
-    - `location`: granular textual location (e.g., “RR Nagar - Ideal Homes”, “E-City - Wipro Gate”).
+Frontend
+*React
+*TypeScript
+*Axios
+*Tailwind CSS
+The frontend is built using Create React App and runs on localhost:3000.
 
-- **Incident detections**
-  - `Detections` table logs:
-    - `zone_id` of the incident
-    - `detected_people` (approx number of affected people)
-    - `detection_time`
-    - `location` (e.g., “RR Nagar - Mysore Road Flood Zone”, “Bellandur - EcoWorld Bus Stop”)
-  - Includes multiple scenarios per zone to simulate realistic workloads.
+📂 Project Structure
 
-- **Rescue assignments**
-  - `Assignments` link:
-    - `volunteer_id`
-    - `detection_id`
-    - `shelter_id`
-  - Tracks `status` (`Pending` / `Completed`) and `assignment_time`.
-  - Enables queries like “Which volunteer is taking which people from where to which shelter?”.
+EcoRescue/
+│
+├── backend/
+│   ├── main.py
+│   ├── yolov8n.pt
+│
+├── frontend/
+│   ├── src/
+│   ├── package.json
+│
+├── database/
+│
+└── README.md
 
----
+🗄 Database Design
+Main Tables Used:
+1️⃣ Zones
+Stores disaster zone information.
+Fields:
+id
+name
+risk_level
+color
+last_update
 
-## Tech Stack
+2️⃣ Shelters
+Stores shelter details.
+Fields:
+id
+zone_id
+available_beds
 
-- **Database:** MySQL (tested with MySQL 8+)
-- **Schema style:** Relational, with foreign key constraints for referential integrity
-- **Intended usage:**
-  - Backend for a web/mobile emergency response app
-  - Data source for dashboards (e.g., risk maps, shelter capacity views)
-  - Testbed for algorithms like optimal volunteer-shelter assignment and load balancing
+3️⃣ Volunteers
+Stores volunteer information.
+Fields:
+id
+zone_id
+status
+Status:
+Available
+Assigned
 
----
+4️⃣ Detections
+Stores AI detection results.
+Fields:
+id
+zone_id
+detected_people
+location
+detection_time
 
-## Possible Extensions
+5️⃣ Assignments
+Links volunteers and shelters to a detection event.
+Fields:
+volunteer_id
+detection_id
+shelter_id
 
-- **Frontend dashboard**
-  - Map-based UI showing:
-    - Zones colored by risk.
-    - Shelter capacity indicators.
-    - Live incident markers and active missions.
+1️⃣ Clone the Repository
+git clone https://github.com/MayurKk777/ecorescue.git
+cd ecorescue
 
-- **Optimization / AI layer**
-  - Algorithms to:
-    - Suggest best volunteer–shelter pairing based on distance and capacity.
-    - Re-route missions when a shelter nears full capacity.
+🖥 Backend Setup (FastAPI)
+2️⃣ Create a Python Virtual Environment
+python -m venv venv
 
-- **Integration with external data**
-  - Weather, flood forecasts, or IoT sensors feeding detections.
-  - SMS / WhatsApp alert integration for volunteers and affected residents.
+Activate it:
+Windows
+venv\Scripts\activate
+Mac / Linux
+source venv/bin/activate
 
-- **Role-based access control**
-  - Separate permissions for:
-    - Admins (configure zones, shelters)
-    - Field coordinators (manage assignments)
-    - Volunteers (view assigned missions and update status)
+3️⃣ Install Backend Dependencies
+pip install fastapi
+pip install uvicorn
+pip install mysql-connector-python
+pip install ultralytics
+pip install opencv-python
+pip install numpy
 
+4️⃣ Run the Backend Server
+Navigate to the backend folder (if applicable):
+cd backend
+Start the FastAPI server:
+uvicorn main:app --reload
+Backend will run at:
+http://localhost:8000
+API documentation will be available at:
+http://localhost:8000/docs
+
+🌐 Frontend Setup (React)
+
+5️⃣ Navigate to Frontend Folder
+cd frontend
+
+6️⃣ Install Node Modules
+npm install
+
+7️⃣ Start the React Development Server
+npm start
+Frontend will run at:
+http://localhost:3000
+
+🗄 Database Setup (MySQL)
+Install MySQL
+Create a database named:
+CREATE DATABASE ecorescue;
+Update database credentials in main.py if needed:
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'rootkey',
+    'database': 'ecorescue'
+}
+
+🚀 Running the Full System
+
+Start services in this order:
+1️⃣ Start MySQL Database
+2️⃣ Run FastAPI Backend
+uvicorn main:app --reload
+3️⃣ Start React Frontend
+npm start
+Now open the system in your browser:
+http://localhost:3000
