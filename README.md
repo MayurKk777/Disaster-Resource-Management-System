@@ -1,215 +1,319 @@
-EcoRescue – AI Powered Disaster Response System
+# 🌍 EcoRescue — AI-Powered Disaster Response System
 
-📌 Overview
-EcoRescue is an AI-powered disaster response and resource allocation system designed to assist emergency response teams during natural disasters such as floods, earthquakes, and large-scale evacuations.
-The system uses computer vision and intelligent resource allocation algorithms to detect people in affected zones and automatically assign shelter beds and volunteers in real time.
-The platform consists of:
-AI-based people detection
-Automated volunteer assignment
-Shelter resource management
-Risk monitoring dashboard
-The goal of EcoRescue is to reduce response time, improve coordination, and optimize resource distribution during emergencies.
+An intelligent disaster response and resource allocation platform that combines **computer vision** and **automated resource management** to assist emergency teams during natural disasters. The system detects people in affected zones using YOLOv8, then automatically assigns shelters and volunteers in real time.
 
-🚀 Features
+---
 
-1️⃣ AI-based People Detection
-Uses YOLOv8 object detection model
-Detects number of people in uploaded images
-Automatically records detection data in the database
-The model used:
-YOLOv8n (Ultralytics)
+## 📋 Table of Contents
 
-2️⃣ Intelligent Resource Allocation
-After detecting people in a zone, the system:
-Finds available shelters
-Checks available beds
-Assigns volunteers
-Updates shelter occupancy automatically
-This is handled by the AI Agent Logic in the backend.
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [System Architecture](#-system-architecture)
+- [Database Schema](#-database-schema)
+- [API Endpoints](#-api-endpoints)
+- [Getting Started](#-getting-started)
+- [Project Structure](#-project-structure)
+- [Risk Classification](#-risk-classification)
+- [License](#-license)
 
-3️⃣ Risk Level Monitoring
-Each zone is dynamically classified into risk levels based on:
-Number of detected people
-Shelter overload
-Detection frequency
-Risk Levels:
-Risk Score	Level	Color
-0–50	Safe	Green
-51–100	Caution	Yellow
-101–200	Elevated	Orange
-200+	Severe	Red
+---
 
-The system automatically updates zone risk status.
-4️⃣ Emergency Dashboard
-The dashboard provides real-time information such as:
-Total detected people
-Available shelter beds
-Active volunteers
-Critical zones
-Zone-level statistics
-Data is fetched through the /dashboard API.
+## ✨ Features
 
-🏗 System Architecture
+### 🤖 AI-Based People Detection
+- Uses **YOLOv8n** (Ultralytics) for real-time object detection
+- Detects the number of people in uploaded images from disaster zones
+- Automatically records detection data with timestamps and location
 
+### 🧠 Intelligent Resource Allocation
+After detecting people in a zone, the system's **AI Agent** automatically:
+- Finds available shelters in the affected area
+- Checks available bed capacity
+- Assigns the nearest available volunteers
+- Updates shelter occupancy in real time
 
-          Camera / Image Upload
-                    │
-                    ▼
-           AI Detection (YOLOv8)
-                    │
-                    ▼
-           FastAPI Backend Server
-                    │
-       ┌────────────┼────────────┐
-       ▼            ▼            ▼
-   MySQL DB     AI Agent      Risk Engine
-       │            │            │
-       ▼            ▼            ▼
-     Shelters   Volunteer     Zone Status
-     Database   Assignment     Update
-                    │
-                    ▼
-             React Dashboard
-🛠 Tech Stack
-Backend
-*FastAPI
-*Python
-*YOLOv8 (Ultralytics)
-*OpenCV
-*NumPy
-*MySQL
+### 📊 Dynamic Risk Monitoring
+Each disaster zone is classified into risk levels based on:
+- Number of detected people
+- Shelter overload status
+- Detection frequency
 
-Frontend
-*React
-*TypeScript
-*Axios
-*Tailwind CSS
-The frontend is built using Create React App and runs on localhost:3000.
+### 🖥 Emergency Dashboard
+A real-time React dashboard displaying:
+- Total detected people across all zones
+- Available shelter beds
+- Active volunteer count
+- Critical zone alerts
+- Zone-level statistics with color-coded risk indicators
 
-📂 Project Structure
+---
 
-EcoRescue/
-│
-├── backend/
-│   ├── main.py
-│   ├── yolov8n.pt
-│
-├── frontend/
-│   ├── src/
-│   ├── package.json
-│
-├── database/
-│
-└── README.md
+## 🛠 Tech Stack
 
-🗄 Database Design
-Main Tables Used:
-1️⃣ Zones
-Stores disaster zone information.
-Fields:
-id
-name
-risk_level
-color
-last_update
+| Layer        | Technology                                                     |
+| ------------ | -------------------------------------------------------------- |
+| **Backend**  | Python 3, FastAPI, Uvicorn                                     |
+| **AI/ML**    | YOLOv8 (Ultralytics), OpenCV, NumPy                           |
+| **Frontend** | React, TypeScript, Tailwind CSS, Axios                         |
+| **Database** | MySQL                                                          |
 
-2️⃣ Shelters
-Stores shelter details.
-Fields:
-id
-zone_id
-available_beds
+---
 
-3️⃣ Volunteers
-Stores volunteer information.
-Fields:
-id
-zone_id
-status
-Status:
-Available
-Assigned
+## 🏗 System Architecture
 
-4️⃣ Detections
-Stores AI detection results.
-Fields:
-id
-zone_id
-detected_people
-location
-detection_time
+```
+┌─────────────────────────┐
+│   Camera / Image Upload │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│   AI Detection (YOLOv8) │
+│   People counting &     │
+│   zone classification   │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│   FastAPI Backend        │
+│   REST API Server        │
+└────┬───────┬────────┬───┘
+     │       │        │
+     ▼       ▼        ▼
+┌────────┐ ┌──────┐ ┌──────────┐
+│ MySQL  │ │  AI  │ │   Risk   │
+│   DB   │ │Agent │ │  Engine  │
+└────┬───┘ └──┬───┘ └────┬─────┘
+     │        │          │
+     ▼        ▼          ▼
+┌────────┐ ┌────────┐ ┌──────────┐
+│Shelter │ │Voluntr │ │  Zone    │
+│Mgmt    │ │Assign  │ │  Status  │
+└────────┘ └────────┘ └──────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│   React Dashboard       │
+│   Real-time monitoring  │
+└─────────────────────────┘
+```
 
-5️⃣ Assignments
-Links volunteers and shelters to a detection event.
-Fields:
-volunteer_id
-detection_id
-shelter_id
+---
 
-1️⃣ Clone the Repository
-git clone https://github.com/MayurKk777/ecorescue.git
-cd ecorescue
+## 🗄 Database Schema
 
-🖥 Backend Setup (FastAPI)
-2️⃣ Create a Python Virtual Environment
-python -m venv venv
+### `zones`
+| Column       | Type     | Description                          |
+| ------------ | -------- | ------------------------------------ |
+| id           | INT (PK) | Zone identifier                      |
+| name         | VARCHAR  | Zone name                            |
+| risk_level   | VARCHAR  | Current risk classification          |
+| color        | VARCHAR  | UI color code (green/yellow/orange/red) |
+| last_update  | DATETIME | Last status update timestamp         |
 
-Activate it:
-Windows
-venv\Scripts\activate
-Mac / Linux
-source venv/bin/activate
+### `shelters`
+| Column         | Type     | Description                        |
+| -------------- | -------- | ---------------------------------- |
+| id             | INT (PK) | Shelter identifier                |
+| zone_id        | INT (FK) | Associated zone                   |
+| available_beds | INT      | Number of available beds          |
 
-3️⃣ Install Backend Dependencies
-pip install fastapi
-pip install uvicorn
-pip install mysql-connector-python
-pip install ultralytics
-pip install opencv-python
-pip install numpy
+### `volunteers`
+| Column | Type     | Description                              |
+| ------ | -------- | ---------------------------------------- |
+| id     | INT (PK) | Volunteer identifier                     |
+| zone_id| INT (FK) | Assigned zone                            |
+| status | ENUM     | `Available` or `Assigned`                |
 
-4️⃣ Run the Backend Server
-Navigate to the backend folder (if applicable):
-cd backend
-Start the FastAPI server:
-uvicorn main:app --reload
-Backend will run at:
-http://localhost:8000
-API documentation will be available at:
-http://localhost:8000/docs
+### `detections`
+| Column          | Type      | Description                          |
+| --------------- | --------- | ------------------------------------ |
+| id              | INT (PK)  | Detection record identifier          |
+| zone_id         | INT (FK)  | Zone where detection occurred        |
+| detected_people | INT       | Number of people detected            |
+| location        | VARCHAR   | Specific location within zone        |
+| detection_time  | DATETIME  | Timestamp of detection               |
 
-🌐 Frontend Setup (React)
+### `assignments`
+| Column        | Type     | Description                            |
+| ------------- | -------- | -------------------------------------- |
+| volunteer_id  | INT (FK) | Assigned volunteer                     |
+| detection_id  | INT (FK) | Related detection event                |
+| shelter_id    | INT (FK) | Assigned shelter                       |
 
-5️⃣ Navigate to Frontend Folder
-cd frontend
+---
 
-6️⃣ Install Node Modules
-npm install
+## 🔌 API Endpoints
 
-7️⃣ Start the React Development Server
-npm start
-Frontend will run at:
-http://localhost:3000
+### Detection
+| Method | Endpoint        | Description                              |
+| ------ | --------------- | ---------------------------------------- |
+| POST   | `/detect`       | Upload image for AI people detection     |
 
-🗄 Database Setup (MySQL)
-Install MySQL
-Create a database named:
+### Zones
+| Method | Endpoint        | Description                              |
+| ------ | --------------- | ---------------------------------------- |
+| GET    | `/zones`        | List all disaster zones with risk levels |
+
+### Shelters
+| Method | Endpoint        | Description                              |
+| ------ | --------------- | ---------------------------------------- |
+| GET    | `/shelters`     | List all shelters with bed availability  |
+
+### Volunteers
+| Method | Endpoint        | Description                              |
+| ------ | --------------- | ---------------------------------------- |
+| GET    | `/volunteers`   | List all volunteers with status          |
+
+### Dashboard
+| Method | Endpoint        | Description                              |
+| ------ | --------------- | ---------------------------------------- |
+| GET    | `/dashboard`    | Aggregated KPIs for the emergency dashboard |
+
+> 📖 Full interactive API docs available at `http://localhost:8000/docs` (Swagger UI)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Python 3.10+**
+- **Node.js 18+**
+- **MySQL** running locally
+- **npm**
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/MayurKk777/Disaster-Resource-Management-System.git
+cd Disaster-Resource-Management-System
+```
+
+### 2. Set Up the Database (MySQL)
+
+```sql
 CREATE DATABASE ecorescue;
-Update database credentials in main.py if needed:
+```
+
+Update database credentials in `backend/main.py` if needed:
+
+```python
 db_config = {
     'host': 'localhost',
     'user': 'root',
     'password': 'rootkey',
     'database': 'ecorescue'
 }
+```
 
-🚀 Running the Full System
+### 3. Set Up the Backend
+
+```bash
+cd backend
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate        # macOS / Linux
+# venv\Scripts\activate         # Windows
+
+# Install dependencies
+pip install fastapi uvicorn mysql-connector-python ultralytics opencv-python numpy
+```
+
+### 4. Set Up the Frontend
+
+```bash
+cd frontend
+npm install
+```
+
+### 5. Run the Full System
 
 Start services in this order:
-1️⃣ Start MySQL Database
-2️⃣ Run FastAPI Backend
+
+```bash
+# 1. Ensure MySQL is running
+
+# 2. Start the FastAPI backend
+cd backend
+source venv/bin/activate
 uvicorn main:app --reload
-3️⃣ Start React Frontend
+# → http://localhost:8000
+
+# 3. Start the React frontend (new terminal)
+cd frontend
 npm start
-Now open the system in your browser:
-http://localhost:3000
+# → http://localhost:3000
+```
+
+### 6. Access the Application
+
+| Service            | URL                          |
+| ------------------ | ---------------------------- |
+| Frontend Dashboard | http://localhost:3000         |
+| Backend API        | http://localhost:8000         |
+| API Docs (Swagger) | http://localhost:8000/docs    |
+
+---
+
+## 📁 Project Structure
+
+```
+Disaster-Resource-Management-System/
+├── backend/
+│   ├── main.py              # FastAPI app with all endpoints
+│   └── yolov8n.pt           # YOLOv8 pre-trained model weights
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/      # React UI components
+│   │   ├── App.tsx           # Main application component
+│   │   └── index.tsx         # Entry point
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── database/                 # Database scripts / schemas
+└── README.md
+```
+
+---
+
+## 🚦 Risk Classification
+
+The system dynamically classifies zones into risk levels:
+
+| Risk Score | Level      | Color    | Action                              |
+| ---------- | ---------- | -------- | ----------------------------------- |
+| 0 – 50     | ✅ Safe     | 🟢 Green  | Normal monitoring                   |
+| 51 – 100   | ⚠️ Caution | 🟡 Yellow | Increased surveillance              |
+| 101 – 200  | 🔶 Elevated| 🟠 Orange | Deploy additional resources         |
+| 200+       | 🔴 Severe  | 🔴 Red    | Full emergency response activated   |
+
+Risk scores are calculated based on:
+- **Detection count** — Number of people detected in the zone
+- **Shelter capacity** — Remaining bed availability
+- **Detection frequency** — How often new detections are happening
+
+---
+
+## 🔮 Future Enhancements
+
+- [ ] Real-time video stream detection (RTSP/webcam)
+- [ ] Drone integration for aerial zone monitoring
+- [ ] Push notifications for critical zone alerts
+- [ ] Historical analytics and trend reporting
+- [ ] Multi-agency coordination features
+- [ ] Mobile app for field volunteers
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+<p align="center">
+  Built with ❤️ by <a href="https://github.com/MayurKk777">Mayur</a>
+</p>
